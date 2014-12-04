@@ -21,8 +21,15 @@ class VisualizeAws
       g.add_node(group.name)
       group.traffic.each { |traffic|
         if traffic.ingress
-          g.add_edge(traffic.from, traffic.to, :color => 'blue', :style => 'bold', :label => traffic.port_range)
+#          if ["pingdom1", "pingdom2", "insights-lb1-usonly-group1", "insights-lb1-usonly-group2"].include(traffic.to)
+
+          log("In To: " + traffic.to)
+          log("In From: " + traffic.from)
+          g.add_edge(traffic.from, traffic.to, :color => 'blue', :style => 'bold', :label => traffic.port_range) unless
+             ["pingdom1", "pingdom2", "insights-lb1-usonly-group1", "insights-lb1-usonly-group2", "insights-lb1-usonly-group3"].include?(traffic.to)
         else
+          log("Out To: " + traffic.to)
+          log("Out From: " + traffic.from)
           g.add_edge(traffic.to, traffic.from, :color => 'red', :style => 'bold', :label => traffic.port_range)
         end
       }
@@ -30,9 +37,14 @@ class VisualizeAws
     g
   end
 
+  def log(msg)
+    puts msg if ENV["DEBUG"]
+  end
+
   def render(g, output_file)
     extension = File.extname(output_file)
-    g.output(extension[1..-1].to_sym => output_file, :use => 'circo')
+    g.output(extension[1..-1].to_sym => output_file, :use => 'circo', :scale => 40, :reduce => true)
+    #g.output(extension[1..-1].to_sym => output_file, :use => 'dot', :scale => 40, :reduce => true)
   end
 end
 
